@@ -1,6 +1,6 @@
 <?php
 
-require_once '../../../vendor/autoload.php';
+require_once './../google-api-php-client/autoload.php';
 
 use rapidweb\googlecontacts\factories\ContactFactory;
 

@@ -180,6 +180,25 @@ abstract class ContactFactory
 
         return new Contact($contactDetails);
     }
+		
+		public static function xml2array($xml)
+		{
+		    $arr = array();
+ 
+		    foreach ($xml->children() as $r)
+		    {
+		        $t = array();
+		        if(count($r->children()) == 0)
+		        {
+		            $arr[$r->getName()] = strval($r);
+		        }
+		        else
+		        {
+		            $arr[$r->getName()][] = xml2array($r);
+		        }
+		    }
+		    return $arr;
+		}
 
     public static function create($name, $phoneNumber, $emailAddress)
     {
@@ -193,6 +212,10 @@ abstract class ContactFactory
 
         $title = $doc->createElement('title', $name);
         $entry->appendChild($title);
+				
+        $content = $doc->createElement('content', 'some content right here');
+        $content->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
+        $entry->appendChild($content);
 
         $email = $doc->createElement('gd:email');
         $email->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
@@ -202,7 +225,13 @@ abstract class ContactFactory
         $contact = $doc->createElement('gd:phoneNumber', $phoneNumber);
         $contact->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
         $entry->appendChild($contact);
-
+				
+        $industry = $doc->createElement('gd:extendedProperty');
+        $industry->setAttribute('name', 'industry');
+        $industry->setAttribute('value', 'coolInc');
+        $industry->setAttribute('rel', 'http://schemas.google.com/g/2005#work');
+        $entry->appendChild($industry);
+				
         $xmlToSend = $doc->saveXML();
 
         $client = GoogleHelper::getClient();
@@ -218,6 +247,9 @@ abstract class ContactFactory
 
         $xmlContact = simplexml_load_string($response);
         $xmlContact->registerXPathNamespace('gd', 'http://schemas.google.com/g/2005');
+				
+				// $contactData = xml2array($xmlContact);
+				error_log( var_export($response, true) );
 
         $xmlContactsEntry = $xmlContact;
 
